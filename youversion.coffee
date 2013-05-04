@@ -2,12 +2,25 @@ nodeio = require 'node.io'
 verses = {}
 output = []
 
-characters =
-	'&#160;' : ' '
-	'&#8217;': '\''
-	'&#8220;': '"'
-	'&#8221;': '"'
-	'&#8212;': '—'
+versions = 
+    'Simplifed Chinese' :
+        'CUNPSS' : 
+            id : 48
+            title : '新标点和合本'
+        'CNVS' :
+            id : 41
+            title : '新译本'
+        'CSBS' :
+            id : 43
+            title : '中文标准译本'
+    'English' :
+        'NIV' :
+            id : 111
+            title : 'New International Version'
+        'KJV' :
+            id : 1
+            title : 'King James Version'
+
 
 getText = (tag)->
 	if tag.type=='text'
@@ -27,7 +40,7 @@ UnicodeToAscii = (content) ->
         result += String.fromCharCode(char.replace(/[&#;]/g, ''))
     result
 
-class Reddit extends nodeio.JobClass
+class Bible extends nodeio.JobClass
     input: false
     run: -> 
         @getHtml 'https://www.youversion.com/zh-CN/bible/43/rom.3.csbs', (err, $, data) =>
@@ -35,8 +48,6 @@ class Reddit extends nodeio.JobClass
 
             $('span.verse').each (span) ->
             	verse = getText(span)
-            	#for oldString,newString of characters
-            	#	verse = verse.replace(new RegExp(oldString,"gm"),newString)
 
             	v = verses[span.attribs['data-usfm']]
             	if v
@@ -49,6 +60,6 @@ class Reddit extends nodeio.JobClass
 
             @emit output
 
-@class = Reddit
-@job = new Reddit({timeout:10})
+@class = Bible
+@job = new Bible({timeout:10})
 
