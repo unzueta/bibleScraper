@@ -5,6 +5,9 @@ output = []
 mongo = require 'mongoskin'
 mongoDB = mongo.db 'localhost:27017/bible',{safe: true}
 
+String.prototype.replaceAll  = (s1,s2) ->   
+    this.replace(new RegExp(s1,"gm"),s2)
+
 versions = 
     'CUNPSS' : 
         id : 48
@@ -40,9 +43,9 @@ getText = (tag)->
 
 UnicodeToAscii = (content) ->
     code = content.match(/&#(\d+);/g) 
-    result= ''
+    result= content
     for char in code
-        result += String.fromCharCode(char.replace(/[&#;]/g, ''))
+        result = result.replaceAll(char,String.fromCharCode(char.replace(/[&#;]/g, '')))
     result
 
 class Bible extends nodeio.JobClass
@@ -50,6 +53,7 @@ class Bible extends nodeio.JobClass
         data = JSON.parse row
         @getHtml data.url, (err, $, scrapedData) =>
             throw err if err
+            verses = []
 
             $('span.verse').each (span) ->
                 verse = getText(span)
@@ -62,6 +66,7 @@ class Bible extends nodeio.JobClass
 
             for number,verse of verses
                 verseNumber = parseInt(number.split('.')[2])
+
                 mongoDB.collection('verse').insert
                     bookId : data.bookId
                     version: data.version
@@ -89,5 +94,5 @@ class Bible extends nodeio.JobClass
             @emit output        
 
 @class = Bible
-@job = new Bible({timeout:10000, max: 1, retries: 5, auto_retry: true})
+@job = new Bible({timeout:10000, max: 20, retries: 5, auto_retry: true})
 
