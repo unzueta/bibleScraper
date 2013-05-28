@@ -37,7 +37,7 @@ getText = (tag)->
         verse = ''
         if tag.children
             for child in tag.children
-                if not child.attribs or child.attribs.class!='label'
+                if not child.attribs or (child.attribs.class!='label' and child.attribs.class!='ft' and child.attribs.class!='fr')
                     verse = verse + getText(child)
         verse
 
@@ -90,9 +90,10 @@ class Bible extends nodeio.JobClass
 
                 if result
                     console.log result
+            @emit output
 
-            @emit output        
+
 
 @class = Bible
-@job = new Bible({timeout:10000, max: 20, retries: 5, auto_retry: true})
+@job = new Bible({timeout:10000, max: 1, retries: 5, auto_retry: true})
 
